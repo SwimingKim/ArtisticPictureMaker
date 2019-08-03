@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">ArtisticPictureMaker</string>
+
+    <string name="bossk">The Flower Girl</string>
+    <string name="crayon">Crayon Drawing</string>
+    <string name="cubist">Cubist Landscape</string>
+    <string name="denoised_starry">The Starry Night</string>
+    <string name="feathers">Feathers Style</string>
+    <string name="ink">Cupcake Illustration</string>
+    <string name="mosaic">Mosaic Style</string>
+    <string name="scream">Skrik, The Scream</string>
+    <string name="udnie">Udnie</string>
+    <string name="wave">The Great Wave off Kanagawasv</string>
+
 </resources>

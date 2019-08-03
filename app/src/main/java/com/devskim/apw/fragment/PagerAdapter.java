@@ -1,5 +1,6 @@
 package com.devskim.apw.fragment;
 
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -17,12 +18,22 @@ public class PagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int i) {
-        return fragments.get(i);
+        return fragments.get((int) getItemId(i));
+    }
+
+    @Override
+    public int getItemPosition(@NonNull Object object) {
+        return fragments.indexOf(object);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position % fragments.size();
     }
 
     @Override
     public int getCount() {
-        return fragments.size();
+        return Integer.MAX_VALUE;
     }
 
 }

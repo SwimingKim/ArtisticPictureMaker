@@ -1,6 +1,8 @@
 package com.devskim.apw
 
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
@@ -16,6 +18,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        window.statusBarColor = Color.BLACK
 
         val file_path = File("sdcard/artistic/")
         if (!file_path.exists()) {
@@ -52,18 +55,18 @@ class MainActivity : AppCompatActivity() {
             }
 
             val image_name = asset.replace("_float.pb", "").toLowerCase()
-            val id: Int? = resources.getIdentifier(image_name, "drawable", packageName)
+            val fragment = ImageFragment()
 
-            id?.let {
-                val drawable = bitmapManager.getImageByName(image_name, this)
-                val fragment = ImageFragment()
-                fragment.setImageDrawable(drawable)
-                fragments.add(fragment)
-            }
+            val information = getString(resources.getIdentifier(image_name, "string", packageName))
+            val drawable = bitmapManager.getImageByName(image_name, this)
+            fragment.setData(drawable, information)
+            fragments.add(fragment)
+
         }
 
         val pagerAdapter = PagerAdapter(supportFragmentManager, fragments)
         view_pager.adapter = pagerAdapter
+        view_pager.currentItem = fragments.size * 10
 
     }
 

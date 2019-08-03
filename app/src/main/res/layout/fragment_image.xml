@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="200dp"
+    android:layout_height="match_parent"
     android:orientation="vertical">
 
     <ImageView
@@ -11,4 +11,20 @@
         android:scaleType="centerCrop"
         android:src="@drawable/bossk" />
 
-</LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.5"
+        android:background="#000" />
+
+    <TextView
+        android:id="@+id/tx_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="20dp"
+        android:text="hihihihihi"
+        android:textAlignment="viewEnd"
+        android:textColor="#fff" />
+
+</RelativeLayout>

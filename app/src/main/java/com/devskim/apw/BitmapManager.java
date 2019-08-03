@@ -107,8 +107,7 @@ public class BitmapManager {
 
     public Drawable getImageByName(String nameOfTheDrawable, Activity a){
         Drawable drawFromPath;
-        int path = a.getResources().getIdentifier(nameOfTheDrawable,
-                "drawable", a.getPackageName());
+        int path = a.getResources().getIdentifier(nameOfTheDrawable,"drawable", a.getPackageName());
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inScaled = false;
