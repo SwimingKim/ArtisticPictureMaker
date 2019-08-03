@@ -6,12 +6,21 @@ apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 28
+    sourceSets{
+        main{
+            jniLibs.srcDirs = ['libs']
+        }
+    }
     defaultConfig {
         applicationId "com.devskim.apw"
         minSdkVersion 22
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
+        ndk{
+            abiFilter"armeabi"
+        }
+
     }
     buildTypes {
         release {

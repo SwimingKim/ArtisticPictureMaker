@@ -12,21 +12,27 @@ import android.os.Trace;
 
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 
 public class BitmapManager {
 
-    private static final int INPUT_SIZE = 256;
+    private static final int INPUT_SIZE = 512;
     private int[] intValues = new int[INPUT_SIZE * INPUT_SIZE];
     private float[] floatValues = new float[INPUT_SIZE * INPUT_SIZE * 3];
     private static final String INPUT_NAME = "input";
     private static final String OUTPUT_NAME = "output_new";
+    private final Matrix matrix;
 
+    public BitmapManager() {
+        matrix = new Matrix();
+        matrix.postScale(1f, 1f);
+        matrix.postRotate(90);
+    }
 
     private Bitmap scaleBitmap(Bitmap origin, int newWidth, int newHeight) {
         if (origin == null) {
@@ -45,7 +51,21 @@ public class BitmapManager {
         return newBitmap;
     }
 
+    public Bitmap convertBitmap(TensorFlowInferenceInterface inferenceInterface, Bitmap input_bitmap) {
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream() ;
+        input_bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+        byte[] byteArray = stream.toByteArray() ;
+
+        Bitmap bitmap0 = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+        Bitmap bitmap = Bitmap.createScaledBitmap(bitmap0, INPUT_SIZE, INPUT_SIZE, false);
+        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix,true);
+        return stylizeImage(inferenceInterface, bitmap);
+    }
+
+
     public Bitmap stylizeImage(TensorFlowInferenceInterface inferenceInterface, Bitmap bitmap) {
+
         Bitmap scaledBitmap = scaleBitmap(bitmap, INPUT_SIZE, INPUT_SIZE);
         scaledBitmap.getPixels(intValues, 0, scaledBitmap.getWidth(), 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight());
 
