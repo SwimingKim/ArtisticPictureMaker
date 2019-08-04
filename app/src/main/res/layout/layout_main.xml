@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#000000">
 
 
     <android.support.v4.view.ViewPager
@@ -9,27 +10,60 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <Button
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+    <LinearLayout
+        android:id="@+id/bt_prev"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_centerVertical="true"
-        android:layout_margin="10dp"
-        android:background="@drawable/arrow"
-        android:scaleX="-1" />
+        android:layout_marginLeft="10dp"
+        android:background="#00ffffff"
+        android:gravity="center">
 
-    <Button
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        <Button
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:background="@drawable/arrow"
+            android:scaleX="-1" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/bt_next"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:layout_marginRight="10dp"
-        android:background="@drawable/arrow" />
+        android:background="#00ffffff"
+        android:gravity="center">
+
+        <Button
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:background="@drawable/arrow" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/iv_preview_image"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/add" />
 
     <ImageView
         android:id="@+id/iv_selected_picture"
         android:layout_width="256dp"
         android:layout_height="256dp"
         android:layout_centerInParent="true" />
+
+    <ProgressBar
+        android:id="@+id/pb_converting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:indeterminate="true"
+        android:visibility="gone" />
 
 
 </RelativeLayout>

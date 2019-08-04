@@ -5,10 +5,12 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Trace;
+import android.util.Log;
 
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
@@ -21,7 +23,7 @@ import java.io.InputStream;
 
 public class BitmapManager {
 
-    private static final int INPUT_SIZE = 256;
+    public static final int INPUT_SIZE = 256;
     private int[] intValues = new int[INPUT_SIZE * INPUT_SIZE];
     private float[] floatValues = new float[INPUT_SIZE * INPUT_SIZE * 3];
     private static final String INPUT_NAME = "input";
@@ -31,7 +33,7 @@ public class BitmapManager {
     public BitmapManager() {
         matrix = new Matrix();
         matrix.postScale(1f, 1f);
-        matrix.postRotate(90);
+        matrix.postRotate(0);
     }
 
     private Bitmap scaleBitmap(Bitmap origin, int newWidth, int newHeight) {
@@ -53,13 +55,15 @@ public class BitmapManager {
 
     public Bitmap convertBitmap(TensorFlowInferenceInterface inferenceInterface, Bitmap input_bitmap) {
 
-        ByteArrayOutputStream stream = new ByteArrayOutputStream() ;
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
         input_bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-        byte[] byteArray = stream.toByteArray() ;
+        byte[] byteArray = stream.toByteArray();
 
         Bitmap bitmap0 = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
         Bitmap bitmap = Bitmap.createScaledBitmap(bitmap0, INPUT_SIZE, INPUT_SIZE, false);
-        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix,true);
+        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+        Log.d("Skim", (bitmap.isRecycled()) + " 22");
+
         return stylizeImage(inferenceInterface, bitmap);
     }
 
@@ -67,6 +71,8 @@ public class BitmapManager {
     public Bitmap stylizeImage(TensorFlowInferenceInterface inferenceInterface, Bitmap bitmap) {
 
         Bitmap scaledBitmap = scaleBitmap(bitmap, INPUT_SIZE, INPUT_SIZE);
+        Log.d("Skim", (scaledBitmap.isRecycled()) + " 33");
+
         scaledBitmap.getPixels(intValues, 0, scaledBitmap.getWidth(), 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight());
 
         for (int i = 0; i < intValues.length; ++i) {
@@ -112,8 +118,8 @@ public class BitmapManager {
 
     public Bitmap getBitmap(String path) {
         try {
-            Bitmap bitmap=null;
-            File f= new File(path);
+            Bitmap bitmap = null;
+            File f = new File(path);
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inPreferredConfig = Bitmap.Config.ARGB_8888;
 
@@ -125,9 +131,9 @@ public class BitmapManager {
         }
     }
 
-    public Drawable getImageByName(String nameOfTheDrawable, Activity a){
+    public Drawable getImageByName(String nameOfTheDrawable, Activity a) {
         Drawable drawFromPath;
-        int path = a.getResources().getIdentifier(nameOfTheDrawable,"drawable", a.getPackageName());
+        int path = a.getResources().getIdentifier(nameOfTheDrawable, "drawable", a.getPackageName());
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inScaled = false;
@@ -151,6 +157,25 @@ public class BitmapManager {
         }
 
         return bitmap;
+    }
+
+    public Bitmap centerCropBitmap(Bitmap bitmap) {
+        int size, left, right;
+        if (bitmap.getWidth() >= bitmap.getHeight()) {
+            size = bitmap.getHeight();
+            left = (size - bitmap.getWidth()) / 2;
+            right = 0;
+        } else {
+            size = bitmap.getWidth();
+            left = 0;
+            right = (size - bitmap.getHeight()) / 2;
+        }
+
+        Bitmap cropBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(cropBitmap);
+        canvas.drawBitmap(bitmap, left, right, null);
+        cropBitmap = Bitmap.createScaledBitmap(cropBitmap, INPUT_SIZE, INPUT_SIZE, false);
+        return cropBitmap;
     }
 
 }
