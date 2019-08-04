@@ -1,8 +1,6 @@
 package com.devskim.apw;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -17,8 +15,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 public class BitmapManager {
 
@@ -33,23 +29,6 @@ public class BitmapManager {
         matrix = new Matrix();
         matrix.postScale(1f, 1f);
         matrix.postRotate(0);
-    }
-
-    private Bitmap scaleBitmap(Bitmap origin, int newWidth, int newHeight) {
-        if (origin == null) {
-            return null;
-        }
-        int height = origin.getHeight();
-        int width = origin.getWidth();
-        float scaleWidth = ((float) newWidth) / width;
-        float scaleHeight = ((float) newHeight) / height;
-        Matrix matrix = new Matrix();
-        matrix.postScale(scaleWidth, scaleHeight);
-        Bitmap newBitmap = Bitmap.createBitmap(origin, 0, 0, width, height, matrix, false);
-        if (!origin.isRecycled()) {
-            origin.recycle();
-        }
-        return newBitmap;
     }
 
     public Bitmap convertBitmap(TensorFlowInferenceInterface inferenceInterface, Bitmap input_bitmap) {
@@ -138,21 +117,6 @@ public class BitmapManager {
         drawFromPath = new BitmapDrawable(source);
 
         return drawFromPath;
-    }
-
-    public static Bitmap getBitmapFromAsset(Context context, String filePath) {
-        AssetManager assetManager = context.getAssets();
-
-        InputStream istr;
-        Bitmap bitmap = null;
-        try {
-            istr = assetManager.open(filePath);
-            bitmap = BitmapFactory.decodeStream(istr);
-        } catch (IOException e) {
-            // handle exception
-        }
-
-        return bitmap;
     }
 
     public Bitmap centerCropBitmap(Bitmap srcBitmap) {

@@ -39,6 +39,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private val INTENT_CAMERA_REQUEST = 101
     private val INTENT_GALLERY_REQUEST = 102
 
+    private var converting_thread: Thread? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -155,13 +157,19 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun convertingImage() {
-        Thread(Runnable {
+        converting_thread?.let {
+            it.interrupt()
+            converting_thread = null
+        }
+
+        converting_thread = Thread(Runnable {
             val bitmap = styleImage()
             runOnUiThread {
                 iv_selected_picture.visibility = View.VISIBLE
                 iv_selected_picture.setImageBitmap(bitmap)
             }
-        }).start()
+        })
+        converting_thread?.start()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
