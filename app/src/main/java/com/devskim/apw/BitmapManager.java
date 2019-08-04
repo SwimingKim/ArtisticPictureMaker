@@ -21,7 +21,7 @@ import java.io.InputStream;
 
 public class BitmapManager {
 
-    private static final int INPUT_SIZE = 512;
+    private static final int INPUT_SIZE = 256;
     private int[] intValues = new int[INPUT_SIZE * INPUT_SIZE];
     private float[] floatValues = new float[INPUT_SIZE * INPUT_SIZE * 3];
     private static final String INPUT_NAME = "input";

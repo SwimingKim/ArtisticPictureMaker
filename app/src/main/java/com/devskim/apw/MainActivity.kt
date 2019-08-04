@@ -7,9 +7,11 @@ import android.support.v4.app.Fragment
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.Menu
 import com.devskim.apw.fragment.ImageFragment
 import com.devskim.apw.fragment.PagerAdapter
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.layout_main.*
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface
 import java.io.File
 
@@ -25,6 +27,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         window.statusBarColor = Color.BLACK
+        setSupportActionBar(bottomAppBar)
 
         val file_path = File("sdcard/artistic/")
         if (!file_path.exists()) {
@@ -77,6 +80,12 @@ class MainActivity : AppCompatActivity() {
         })
         view_pager.currentItem = 0
 
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater = menuInflater
+        inflater.inflate(R.menu.menu_appbar, menu)
+        return true
     }
 
     private fun styleImage(inputBitmp: Bitmap, postion: Int): Bitmap? {
