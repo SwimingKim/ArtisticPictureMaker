@@ -10,7 +10,6 @@ import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Trace;
-import android.util.Log;
 
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 

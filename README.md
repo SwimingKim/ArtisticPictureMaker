@@ -1,1 +1,3 @@
 # ArtisticPictureMaker
+
+![UI](./preview.png)
