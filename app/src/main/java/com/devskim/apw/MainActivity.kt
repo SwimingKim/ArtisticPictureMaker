@@ -141,10 +141,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         } else {
             inputBitmp = Images.Media.getBitmap(contentResolver, data?.getData())
         }
+        inputBitmp = bitmapManager.centerCropBitmap(inputBitmp)
 
         if (inputBitmp == null) return
 
-        inputBitmp = bitmapManager.centerCropBitmap(inputBitmp)
         inputBitmp?.let {
             iv_selected_picture.setImageBitmap(it)
             convertingImage()
@@ -152,11 +152,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun convertingImage() {
-        val bitmap = styleImage()
-        runOnUiThread {
-            iv_selected_picture.visibility = View.VISIBLE
-            iv_selected_picture.setImageBitmap(bitmap)
-        }
+        Thread(Runnable {
+            val bitmap = styleImage()
+            runOnUiThread {
+                iv_selected_picture.visibility = View.VISIBLE
+                iv_selected_picture.setImageBitmap(bitmap)
+            }
+        }).start()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -193,12 +195,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         try {
             pagerAdapter?.let {
                 val p = it.getItemId(view_pager.currentItem).toInt()
-                Log.d("Skim", p.toString())
                 val name = getAssetPath(data_names[p])
 
                 inputBitmp?.let {
                     tensorFlowInferenceInterface = TensorFlowInferenceInterface(assets, name)
-                    Log.d("Skim", (it.isRecycled).toString() + " 11")
                     val bitmap = bitmapManager.convertBitmap(tensorFlowInferenceInterface, it)
                     runOnUiThread {
                         pb_converting.visibility = View.GONE

@@ -62,7 +62,6 @@ public class BitmapManager {
         Bitmap bitmap0 = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
         Bitmap bitmap = Bitmap.createScaledBitmap(bitmap0, INPUT_SIZE, INPUT_SIZE, false);
         bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-        Log.d("Skim", (bitmap.isRecycled()) + " 22");
 
         return stylizeImage(inferenceInterface, bitmap);
     }
@@ -70,10 +69,8 @@ public class BitmapManager {
 
     public Bitmap stylizeImage(TensorFlowInferenceInterface inferenceInterface, Bitmap bitmap) {
 
-        Bitmap scaledBitmap = scaleBitmap(bitmap, INPUT_SIZE, INPUT_SIZE);
-        Log.d("Skim", (scaledBitmap.isRecycled()) + " 33");
-
-        scaledBitmap.getPixels(intValues, 0, scaledBitmap.getWidth(), 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight());
+//        Bitmap scaledBitmap = scaleBitmap(bitmap, INPUT_SIZE, INPUT_SIZE);
+        bitmap.getPixels(intValues, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
 
         for (int i = 0; i < intValues.length; ++i) {
             final int val = intValues[i];
@@ -101,8 +98,8 @@ public class BitmapManager {
                             | (((int) (floatValues[i * 3 + 1])) << 8)
                             | ((int) (floatValues[i * 3 + 2]));
         }
-        scaledBitmap.setPixels(intValues, 0, scaledBitmap.getWidth(), 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight());
-        return scaledBitmap;
+        bitmap.setPixels(intValues, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+        return bitmap;
     }
 
     public void saveBitmap(String path, Bitmap bitmap) {
@@ -159,22 +156,21 @@ public class BitmapManager {
         return bitmap;
     }
 
-    public Bitmap centerCropBitmap(Bitmap bitmap) {
+    public Bitmap centerCropBitmap(Bitmap srcBitmap) {
         int size, left, right;
-        if (bitmap.getWidth() >= bitmap.getHeight()) {
-            size = bitmap.getHeight();
-            left = (size - bitmap.getWidth()) / 2;
+        if (srcBitmap.getWidth() >= srcBitmap.getHeight()) {
+            size = srcBitmap.getHeight();
+            left = (size - srcBitmap.getWidth()) / 2;
             right = 0;
         } else {
-            size = bitmap.getWidth();
+            size = srcBitmap.getWidth();
             left = 0;
-            right = (size - bitmap.getHeight()) / 2;
+            right = (size - srcBitmap.getHeight()) / 2;
         }
 
         Bitmap cropBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(cropBitmap);
-        canvas.drawBitmap(bitmap, left, right, null);
-        cropBitmap = Bitmap.createScaledBitmap(cropBitmap, INPUT_SIZE, INPUT_SIZE, false);
+        canvas.drawBitmap(srcBitmap, left, right, null);
         return cropBitmap;
     }
 
