@@ -21,6 +21,9 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.layout_main.*
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface
 import java.io.File
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import android.net.Uri
 
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
@@ -225,10 +228,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private fun shareIntent() {
         if (inputBitmp == null) return
 
+        val drawable = iv_selected_picture.drawable as BitmapDrawable
+        val path = Images.Media.insertImage(contentResolver, drawable.bitmap, "Image Description", null)
+        val uri = Uri.parse(path)
+
         val intent = Intent(Intent.ACTION_SEND)
-        intent.type = "image/png"
-        intent.putExtra(Intent.EXTRA_STREAM, inputBitmp)
-        startActivity(Intent.createChooser(intent, "Share"))
+        intent.type = "image/jpg"
+        intent.putExtra(Intent.EXTRA_STREAM, uri)
+        startActivity(Intent.createChooser(intent, "Share Image"))
     }
 
 }
