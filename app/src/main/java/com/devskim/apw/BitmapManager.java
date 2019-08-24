@@ -1,13 +1,18 @@
 package com.devskim.apw;
 
 import android.app.Activity;
+import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.ExifInterface;
+import android.net.Uri;
 import android.os.Trace;
+import android.provider.MediaStore;
+import android.util.Log;
 
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
@@ -15,6 +20,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class BitmapManager {
 
@@ -119,22 +126,49 @@ public class BitmapManager {
         return drawFromPath;
     }
 
-    public Bitmap centerCropBitmap(Bitmap srcBitmap) {
+    public Bitmap centerCropBitmap(Bitmap srcBitmap, int rotaion) {
         int size, left, right;
         if (srcBitmap.getWidth() >= srcBitmap.getHeight()) {
             size = srcBitmap.getHeight();
-            left = (size - srcBitmap.getWidth()) / 2;
+            left = srcBitmap.getWidth() / 2 - srcBitmap.getHeight() / 2;
             right = 0;
         } else {
             size = srcBitmap.getWidth();
             left = 0;
-            right = (size - srcBitmap.getHeight()) / 2;
+            right = srcBitmap.getHeight() / 2 - srcBitmap.getWidth() / 2;
         }
 
-        Bitmap cropBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(cropBitmap);
-        canvas.drawBitmap(srcBitmap, left, right, null);
-        return cropBitmap;
+        Matrix matrix = new Matrix();
+        matrix.setRotate(rotaion);
+        return Bitmap.createBitmap(srcBitmap, left, right, size, size, matrix, false);
+    }
+
+    public int getOrientation(Activity activity, Uri uri) {
+        try {
+            String[] projection = {MediaStore.Images.Media.DATA};
+            Cursor cursor = activity.managedQuery(uri, projection, null, null, null);
+            activity.startManagingCursor(cursor);
+            int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            String path = cursor.getString(columnIndex);
+            ExifInterface exifInterface = new ExifInterface(path);
+            int exifOrientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+            return exifOrientationToDegrees(exifOrientation);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int exifOrientationToDegrees(int exifOrientation) {
+        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
+            return 90;
+        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {
+            return 180;
+        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {
+            return 270;
+        }
+        return 0;
     }
 
 }

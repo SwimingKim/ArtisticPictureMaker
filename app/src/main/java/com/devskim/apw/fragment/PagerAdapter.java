@@ -36,4 +36,8 @@ public class PagerAdapter extends FragmentPagerAdapter {
         return Integer.MAX_VALUE;
     }
 
+    public int getTypeCount() {
+        return fragments.size();
+    }
+
 }

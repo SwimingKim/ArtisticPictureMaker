@@ -1,16 +1,24 @@
 package com.devskim.apw
 
 import android.app.Activity
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.pm.LabeledIntent
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.MediaStore.Images
+import android.support.annotation.RequiresApi
 import android.support.v4.app.Fragment
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -21,9 +29,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.layout_main.*
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface
 import java.io.File
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
-import android.net.Uri
 
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
@@ -51,6 +56,48 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         initFragment()
         setEvent()
 
+    }
+
+    override fun onPause() {
+        super.onPause()
+        converting_thread?.let {
+            it.interrupt()
+            converting_thread = null
+        }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+            if (inputBitmp == null) return false
+
+            converting_thread?.let {
+                it.interrupt()
+                converting_thread = null
+            }
+            converting_thread = Thread(Runnable {
+                try {
+                    pagerAdapter?.let {
+                        for (i in 0..it.typeCount) {
+                            val filePath = String.format("/sdcard/artistic/%d.jpg", i)
+                            val asset = getAssetPath(data_names[i])
+                            Log.d("Skim", "start converting " + asset)
+                            inputBitmp?.let {
+                                tensorFlowInferenceInterface = TensorFlowInferenceInterface(assets, asset)
+                                val bitmap = bitmapManager.convertBitmap(tensorFlowInferenceInterface, it)
+                                bitmapManager.saveBitmap(filePath, bitmap)
+                                Log.d("Skim", filePath + " save bitmap")
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    if (e.localizedMessage != null) {
+                        Log.d("Skim", e.localizedMessage)
+                    }
+                }
+            })
+            converting_thread?.start()
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     private fun setEvent() {
@@ -135,18 +182,23 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         view_pager.currentItem = fragments.size * 10
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
         if (resultCode != Activity.RESULT_OK) return
 
+        var orientation = 0
         if (requestCode == INTENT_CAMERA_REQUEST) {
             val extras = data?.getExtras()
             inputBitmp = extras?.getParcelable<Bitmap>("data")
         } else {
-            inputBitmp = Images.Media.getBitmap(contentResolver, data?.getData())
+            val uri: Uri? = data?.data
+            uri?.let {
+                orientation = bitmapManager.getOrientation(this, uri)
+                inputBitmp = Images.Media.getBitmap(contentResolver, uri)
+            }
         }
-        inputBitmp = bitmapManager.centerCropBitmap(inputBitmp)
+        inputBitmp = bitmapManager.centerCropBitmap(inputBitmp, orientation)
 
         if (inputBitmp == null) return
 
@@ -237,13 +289,44 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         if (inputBitmp == null) return
 
         val drawable = iv_selected_picture.drawable as BitmapDrawable
-        val path = Images.Media.insertImage(contentResolver, drawable.bitmap, "Image Description", null)
+        val path = Images.Media.insertImage(contentResolver, drawable.bitmap, "Share Image", null)
         val uri = Uri.parse(path)
 
-        val intent = Intent(Intent.ACTION_SEND)
-        intent.type = "image/jpg"
+        val intent = getNativeShareIntent(this, uri)
+        startActivity(intent)
+    }
+
+    fun getNativeShareIntent(context: Context, uri: Uri): Intent {
+        val pm = context.getPackageManager()
+        val sendIntent = Intent(Intent.ACTION_SEND)
+        sendIntent.putExtra(Intent.EXTRA_STREAM, uri)
+        sendIntent.type = "image/jpg"
+        val resInfo = pm.queryIntentActivities(sendIntent, 0)
+        val intentList = arrayListOf<Intent>()
+
+        for (i in resInfo.indices) {
+            val ri = resInfo.get(i)
+            val packageName = ri.activityInfo.packageName
+            val intent = Intent()
+            intent.component = ComponentName(packageName, ri.activityInfo.name)
+            intent.setPackage(packageName)
+            intent.action = Intent.ACTION_SEND
+            intent.putExtra(Intent.EXTRA_STREAM, uri)
+            intent.type = "image/jpg"
+            intentList.add(LabeledIntent(intent, packageName, ri.loadLabel(pm), ri.getIconResource()))
+        }
+        intentList.add(1, getSaveToGalleryIntent(context, uri))
+
+        val openInChooser = Intent.createChooser(intentList.removeAt(0), "Share Image")
+        val extraIntents = intentList.toTypedArray()
+        openInChooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, extraIntents)
+        return openInChooser
+    }
+
+    private fun getSaveToGalleryIntent(context: Context, uri: Uri): Intent {
+        val intent = Intent(context, MainActivity::class.java)
         intent.putExtra(Intent.EXTRA_STREAM, uri)
-        startActivity(Intent.createChooser(intent, "Share Image"))
+        return LabeledIntent(intent, BuildConfig.APPLICATION_ID, "Save to gallery", R.drawable.gallery)
     }
 
 }
