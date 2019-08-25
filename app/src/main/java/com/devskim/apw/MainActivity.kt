@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.LabeledIntent
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
@@ -49,7 +48,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        window.statusBarColor = Color.BLACK
         setSupportActionBar(bottomAppBar)
 
         makeFolder()
@@ -67,7 +65,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP && BuildConfig.DEBUG) {
             if (inputBitmp == null) return false
 
             converting_thread?.let {
@@ -324,7 +322,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun getSaveToGalleryIntent(context: Context, uri: Uri): Intent {
-        val intent = Intent(context, MainActivity::class.java)
+//        val intent = Intent(context, MainActivity::class.java)
+        val intent = Intent(Intent.ACTION_PICK)
         intent.putExtra(Intent.EXTRA_STREAM, uri)
         return LabeledIntent(intent, BuildConfig.APPLICATION_ID, "Save to gallery", R.drawable.gallery)
     }
